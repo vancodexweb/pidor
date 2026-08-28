@@ -1,0 +1,13 @@
+[project]
+name = "telegram-booking-platform"
+version = "1.0.0"
+description = "Multi-bot Telegram platform for accepting requests and booking clients"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
