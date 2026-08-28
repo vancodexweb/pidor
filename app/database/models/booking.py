@@ -47,4 +47,6 @@ class Booking(Base):
     )
 
     bot: Mapped["Bot"] = relationship(back_populates="bookings")  # noqa: F821
-    slot: Mapped["TimeSlot"] = relationship(back_populates="booking")  # noqa: F821
+    # One-directional on purpose — see the comment on TimeSlot in time_slot.py
+    # for why there is no back_populates / reverse relationship for this.
+    slot: Mapped["TimeSlot"] = relationship()  # noqa: F821

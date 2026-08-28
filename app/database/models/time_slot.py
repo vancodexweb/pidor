@@ -40,4 +40,13 @@ class TimeSlot(Base):
     )
 
     bot: Mapped["Bot"] = relationship(back_populates="time_slots")  # noqa: F821
-    booking: Mapped["Booking"] = relationship(back_populates="slot", uselist=False)  # noqa: F821
+
+    # Deliberately no reverse `booking` relationship here. A slot is not
+    # actually one-to-one with Booking over its lifetime: cancelling a
+    # booking leaves its row (with this slot_id) in place, and the slot can
+    # then be booked again, producing a second Booking row for the same
+    # slot_id. A back_populates uselist=False relationship would try to
+    # enforce a one-to-one invariant by lazily loading the "previous" booking
+    # and nulling out its slot_id — corrupting that historical row. Nothing
+    # in the app reads TimeSlot.booking; only Booking.slot (one-directional,
+    # see booking.py) is ever used.

@@ -66,10 +66,19 @@ class BookingService:
             phone=phone,
             status=BookingStatus.CONFIRMED,
         )
-
         try:
             async with self.session.begin_nested():
                 self.session.add(booking)
+                # Populate the relationship in-memory from the slot we already
+                # hold, instead of leaving it to lazy-load. booking.slot is a
+                # relationship, not a plain column, so it is never implicitly
+                # loaded by commit/flush; callers (booking.py,
+                # NotificationService) read booking.slot synchronously right
+                # after this returns, and an unpopulated relationship access
+                # with no await raises MissingGreenlet. Must be set after
+                # add(), not before — the back-populated TimeSlot.booking side
+                # warns if `booking` isn't in the session yet.
+                booking.slot = slot
                 await self.session.flush()
         except IntegrityError as exc:
             logger.warning("Race detected while booking slot_id=%s: %s", slot_id, exc)
